@@ -1,0 +1,64 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000"><title>JS100</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon.svg">
+<style>
+:root{--o:#ff6a00;--c:#0f0f0f;--l:#262626;--t:#eee;--m:#8a8a8a}
+*{box-sizing:border-box;margin:0}
+body{background:#000;color:var(--t);font:16px/1.55 system-ui,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+main{max-width:560px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:baseline;font-size:22px;font-weight:800}
+header b{color:var(--o)}header span{font:14px monospace;color:var(--m)}
+.bar{height:3px;background:var(--l);margin:12px 0}.bar i{display:block;height:100%;background:var(--o);width:0;transition:width .3s}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:14px 0 22px}
+.grid button{aspect-ratio:1;background:var(--c);color:var(--m);border:1px solid var(--l);font:11px monospace;cursor:pointer;padding:0}
+.grid .d{background:var(--o);color:#000;border-color:var(--o)}
+.grid .n{border-color:#fff;color:#fff}
+.tag{color:var(--o);font:13px monospace}
+h2{font-size:28px;line-height:1.15;margin:6px 0 14px}
+.box{border-left:3px solid var(--o);background:var(--c);padding:12px 14px;margin:12px 0}
+.box small{display:block;color:var(--o);font-weight:700;margin-bottom:4px}
+.q{font-family:ui-monospace,Menlo,monospace;font-size:15px}
+input{width:100%;background:#000;border:1px solid var(--l);color:var(--o);font:16px ui-monospace,Menlo,monospace;padding:14px;outline:0;margin:10px 0;border-radius:0}
+input:focus{border-color:var(--o)}
+.r{display:flex;gap:8px}
+.r button{flex:1;padding:14px 4px;border:1px solid var(--o);background:none;color:var(--o);font:700 15px system-ui;cursor:pointer;border-radius:0}
+.r .p{background:var(--o);color:#000;flex:2}
+#msg{min-height:28px;margin-top:12px;font-weight:700;font-family:monospace}.ok{color:#3ddc84}.no{color:#ff5555}
+button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+</style></head><body><main>
+<header><div>JS<b>100</b></div><span id="cnt"></span></header>
+<div class="bar"><i id="pb"></i></div>
+<div class="grid" id="grid"></div>
+<div class="tag" id="tag"></div><h2 id="ti"></h2>
+<div class="box"><small>Объяснение</small><div id="ex"></div></div>
+<div class="box"><small>Задание</small><div class="q" id="q"></div></div>
+<input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Твой ответ">
+<div class="r"><button class="p" id="chk">Проверить</button><button id="ans">Ответ</button><button id="nx">Дальше</button></div>
+<div id="msg"></div></main>
+<script src="tasks.js"></script>
+<script>
+const $=s=>document.querySelector(s),norm=s=>s.toLowerCase().replace(/\s+/g,'').replace(/["'`]/g,"'").replace(/;$/,'');
+let done=JSON.parse(localStorage.getItem('js100')||'[]'),cur=+localStorage.getItem('js100c')||0;
+const sec=i=>i<40?'JavaScript':i<80?'TypeScript':'Чёрная магия JS';
+function save(){localStorage.setItem('js100',JSON.stringify(done));localStorage.setItem('js100c',cur)}
+function draw(){
+ $('#grid').innerHTML='';
+ T.forEach((_,i)=>{const b=document.createElement('button');b.textContent=i+1;
+  b.className=(done.includes(i)?'d ':'')+(i==cur?'n':'');b.onclick=()=>{cur=i;show()};$('#grid').append(b)});
+ $('#cnt').textContent=done.length+' / 100';$('#pb').style.width=done.length+'%';
+}
+function show(){const t=T[cur];save();draw();
+ $('#tag').textContent='Задача '+(cur+1)+' из 100, '+sec(cur);
+ $('#ti').textContent=t[0];$('#ex').textContent=t[1];$('#q').textContent=t[2];
+ $('#in').value='';$('#msg').textContent='';$('#msg').className='';$('#in').focus({preventScroll:true})}
+function check(){const v=norm($('#in').value);if(!v)return;
+ if(T[cur][3].map(norm).includes(v)){if(!done.includes(cur))done.push(cur);save();draw();
+  $('#msg').textContent='Верно!';$('#msg').className='ok'}
+ else{$('#msg').textContent='Не то. Попробуй ещё или нажми «Ответ»';$('#msg').className='no'}}
+$('#chk').onclick=check;$('#in').onkeydown=e=>{if(e.key=='Enter')check()};
+$('#ans').onclick=()=>{$('#msg').textContent='Ответ: '+T[cur][3][0];$('#msg').className=''};
+$('#nx').onclick=()=>{cur=(cur+1)%T.length;show()};
+show();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
